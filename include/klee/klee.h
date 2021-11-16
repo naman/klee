@@ -141,6 +141,9 @@ extern "C" {
   /* Print stack trace. */
   void klee_stack_trace(void);
 
+  /*MOH Print a dump of memory. */
+  void klee_dump_memory(void);
+
   /* Print range for given argument and tagged with name */
   void klee_print_range(const char * name, int arg );
 

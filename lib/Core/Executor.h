@@ -28,6 +28,8 @@
 
 #include "../Expr/ArrayExprOptimizer.h"
 
+#include "Dump.h"
+
 #include <map>
 #include <memory>
 #include <set>
@@ -49,6 +51,11 @@ namespace llvm {
   class DataLayout;
   class Twine;
   class Value;
+}
+
+/*MOH*/
+namespace kleeExternal {
+    class Dump;
 }
 
 namespace klee {  
@@ -90,10 +97,20 @@ class Executor : public Interpreter {
   friend class SpecialFunctionHandler;
   friend class StatsTracker;
   friend class MergeHandler;
+  /*MOH*/
+  friend class kleeExternal::Dump;
 
 public:
   typedef std::pair<ExecutionState*,ExecutionState*> StatePair;
+  std::vector<kleeExternal::DLocals> st;
 
+  struct NameComparator {
+      template <typename T>
+      bool operator()(T const& left, T const& right) {
+          return left.f < right.f;
+      }
+  };
+//  std::set<kleeExternal::DLocals, NameComparator> dumpSF;
   enum TerminateReason {
     Abort,
     Assert,

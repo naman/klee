@@ -1,0 +1,6 @@
+struct.Tokens 3 struct.obstack 0 12370169555311111083 0 20
+struct.Tokens 3 struct.obstack 6 12370169555311111083 0 20
+struct.Tokens 3 struct.obstack 10 171 0 20
+struct.Tokens 4 struct.obstack 0 12370169555311111083 0 20
+struct.Tokens 4 struct.obstack 6 12370169555311111083 0 20
+struct.Tokens 4 struct.obstack 10 171 0 20

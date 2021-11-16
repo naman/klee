@@ -22,6 +22,9 @@
 #include "klee/Interpreter.h"
 #include "klee/OptionCategories.h"
 
+/*MOH*/
+#include "klee/Internal/Module/LLVMPassManager.h"
+
 #if LLVM_VERSION_CODE >= LLVM_VERSION(4, 0)
 #include "llvm/Bitcode/BitcodeWriter.h"
 #else
@@ -376,6 +379,59 @@ void KModule::checkModule() {
     klee_error("Unexpected instruction operand types detected");
   }
 }
+
+/*MOH
+void KModule::doPasses(const Interpreter::ModuleOptions &opts) {
+	llvm::outs() << "*** INSIDE KModule::doPasses" <<"\n";
+  // Inject checks prior to optimization... we also perform the
+  // invariant transformations that we will end up doing later so that
+  // optimize is seeing what is as close as possible to the final
+  // module.
+  LegacyLLVMPassManagerTy pm;
+  pm.add(new RaiseAsmPass());
+  // This pass will scalarize as much code as possible so that the Executor
+  // does not need to handle operands of vector type for most instructions
+  // other than InsertElementInst and ExtractElementInst.
+  //
+  // NOTE: Must come before division/overshift checks because those passes
+  // don't know how to handle vector instructions.
+  pm.add(createScalarizerPass());
+  if (opts.CheckDivZero) pm.add(new DivCheckPass());
+  if (opts.CheckOvershift) pm.add(new OvershiftCheckPass());
+  // FIXME: This false here is to work around a bug in
+  // IntrinsicLowering which caches values which may eventually be
+  // deleted (via RAUW). This can be removed once LLVM fixes this
+  // issue.
+  pm.add(new IntrinsicCleanerPass(*targetData, false));
+  pm.run(*module);
+
+  if (opts.Optimize)
+    Optimize(module, opts.EntryPoint);
+
+  // FIXME: Missing force import for various math functions.
+
+  // Finally, run the passes that maintain invariants we expect during
+  // interpretation. We run the intrinsic cleaner just in case we
+  // linked in something with intrinsics but any external calls are
+  // going to be unresolved. We really need to handle the intrinsics
+  // directly I think?
+  LegacyLLVMPassManagerTy pm3;
+  pm3.add(createCFGSimplificationPass());
+  switch(SwitchType) {
+  case eSwitchTypeInternal: break;
+  case eSwitchTypeSimple: pm3.add(new LowerSwitchPass()); break;
+  case eSwitchTypeLLVM:  pm3.add(createLowerSwitchPass()); break;
+  default: klee_error("invalid --switch-type");
+  }
+  InstructionOperandTypeCheckPass *operandTypeCheckPass =
+      new InstructionOperandTypeCheckPass();
+  pm3.add(new IntrinsicCleanerPass(*targetData));
+  pm3.add(new PhiCleanerPass());
+  pm3.add(operandTypeCheckPass);
+  pm3.run(*module);
+
+}
+*/
 
 KConstant* KModule::getKConstant(const Constant *c) {
   auto it = constantMap.find(c);

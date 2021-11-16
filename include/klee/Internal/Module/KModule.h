@@ -93,6 +93,9 @@ namespace klee {
     // XXX change to KFunction
     std::set<llvm::Function*> escapingFunctions;
 
+    /*MOH*/
+    std::set<llvm::BasicBlock*> visitedBBs;
+
     std::unique_ptr<InstructionInfoTable> infos;
 
     std::vector<llvm::Constant*> constants;
@@ -143,6 +146,9 @@ namespace klee {
 
     /// Return an id for the given constant, creating a new one if necessary.
     unsigned getConstantID(llvm::Constant *c, KInstruction* ki);
+
+    /*MOH*/
+    void doPasses(const Interpreter::ModuleOptions &opts);
 
     /// Run passes that check if module is valid LLVM IR and if invariants
     /// expected by KLEE's Executor hold.
